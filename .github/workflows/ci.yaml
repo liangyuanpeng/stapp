@@ -1,0 +1,39 @@
+name: build
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+
+jobs:
+  test-with-docker-pose:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install
+      run: |
+        wget -q https://kcl-lang.io/script/install-cli.sh -O - | /bin/bash
+    - uses: actions/checkout@v4
+    - name: install docker compose
+      run: |
+        wget https://kind.sigs.k8s.io/dl/latest/linux-amd64.tgz
+    - name: run
+      run: |
+        kcl run
+    - name: build
+      run: |
+        #kcl run -D image=${{ matrix.image }} -D cpcount=${{ matrix.cpcount }} -D workercount=${{ matrix.workercount }}
+        kcl run | docker-compose -f=-
+        docker-compose ps
+
+  test-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install
+      run: |
+        wget -q https://kcl-lang.io/script/install-cli.sh -O - | /bin/bash
+    - uses: actions/checkout@v4
+    - name: mod push
+      run: |
+        hack/test.sh
